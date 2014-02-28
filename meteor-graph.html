@@ -1,18 +1,17 @@
 <body>
   <div class="container">
-    {{> create_node}}
     {{> nodes}}
   </div>
 </body>
 
 <template name="create_node">
-  <h1>create node</h1>
-  <input id="new_node_name" type="text" value="" />
-  <input type="submit" value="create" />
+  <input id="new_node_name" class="form-control" type="text" value="" placeholder="create node"/>
+  <input type="submit" value="create" class="btn btn-primary"/>
 </template>
 
 <template name="nodes">
   <h1>nodes</h1>
+  {{> create_node}}<br><br>
   <table class="table table-striped">
     <tr><td>name</td><td>time</td></tr>
     {{#each nodes}}

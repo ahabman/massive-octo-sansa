@@ -3,14 +3,19 @@ Edges = new Meteor.Collection("edges");
 
 if (Meteor.isClient) {
 
+  Meteor.startup(function () {
+  });
+
   Template.create_node.events({
     'click input[type=submit]' : function () { // template data, if any, is available in 'this'
-      name = $('#new_node_name');
+
+      new_node_name = $('#new_node_name')
       Nodes.insert({
-        name: name.html(),
+        name: new_node_name.val(),
         time: Date.now()
       });
-      name.html('')
+
+      new_node_name.html('')
     }
   });
 
@@ -33,7 +38,6 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  Meteor.startup(function () {});
 
   Meteor.publish("all-nodes", function () {
     return Nodes.find(); // everything
