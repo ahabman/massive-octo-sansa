@@ -1,0 +1,31 @@
+<body>
+  <div class="container">
+    {{> create_node}}
+    {{> nodes}}
+  </div>
+</body>
+
+<template name="create_node">
+  <h1>create node</h1>
+  <input id="new_node_name" type="text" value="" />
+  <input type="submit" value="create" />
+</template>
+
+<template name="nodes">
+  <h1>nodes</h1>
+  <table class="table table-striped">
+    <tr><td>name</td><td>time</td></tr>
+    {{#each nodes}}
+        {{> node}}
+    {{/each}}
+  </table>
+</template>
+
+<template  name="node">
+  <tr id="{{_id}}">
+    <td class="name" contenteditable>{{name}}</td>
+    <td>{{time}}</td>
+    <td><a href="#" class="update">update</a></td>
+    <td><a href="#" class="delete">delete</a></td>
+  </tr>
+</template>
