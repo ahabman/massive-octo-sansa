@@ -2,9 +2,8 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-6">
+        {{> nodes}}<hr>
         {{> edges}}
-        
-        {{> nodes}}
       </div>
       <div class="col-xs-6">
         <div id="cy"></div>
@@ -16,20 +15,26 @@
 
 <template name="edges">
   <h1>edges</h1>
-  {{> create_edge}}<br><br>
+  {{> create_edge}}<br>
   <table class="table table-striped">
-    <tr><td>n1</td><td>name</td><td>n2</td></tr>
-    {{#each edges}}
-        {{> edge}}
-    {{/each}}
+    <thead>
+      <tr><th>node 1 id</th><th>name</th><th>node 2 id</th></tr>
+    </thead>
+    <tbody>
+      {{#each edges}}
+          {{> edge}}
+      {{/each}}
+    </tbody>
   </table>
 </template>
 
 <template name="create_edge">
-  n1: <input id="create_edge_n1_id" class="form-control" placeholder="node 1 ID" type="text" value="">
-  relation: <input id="create_edge_name" class="form-control" type="text" value="" placeholder="create edge"/>
-  n2: <input id="create_edge_n2_id" class="form-control" placeholder="node 2 ID" type="text" value=""><br>
-  <input type="submit" value="create" class="btn btn-primary"/>
+  <div class="well">
+    <input id="create_edge_n1_id" class="form-control" placeholder="node 1 ID" type="text" value="">
+    <input id="create_edge_name" class="form-control" type="text" value="" placeholder="relation"/>
+    <input id="create_edge_n2_id" class="form-control" placeholder="node 2 ID" type="text" value="">
+    <input type="submit" value="create edge" class="btn btn-primary"/>
+  </div>
 </template>
 
 <template name="edge">
@@ -45,28 +50,46 @@
 
 
 
-
 <template name="nodes">
   <h1>nodes</h1>
-  {{> create_node}}<br><br>
+  {{> create_node}}
   <table class="table table-striped">
-    <tr><td>name</td><td>id</td></tr>
-    {{#each nodes}}
-        {{> node}}
-    {{/each}}
+    <thead>
+      <tr><th>name</th><th>id</th></tr>
+    </thead>
+    <tbody>
+      {{#each nodes}}
+          {{> node}}
+      {{/each}}
+    </tbody>
   </table>
 </template>
 
 <template name="create_node">
-  <input id="new_node_name" class="form-control" type="text" value="" placeholder="create node"/>
-  <input type="submit" value="create" class="btn btn-primary"/>
+  <div class="well">
+    <input id="new_node_name" class="form-control" type="text" value="" placeholder="node name"/>
+
+    <div class="kv_pairs_container"></div>
+
+    <a href="#" id="create_node_add_kv_pair" class="label label-info">add key:value</a>
+
+    <div id="kv_pair_template" class="kv_pair">
+      <input class="create_node_add_key" type="text" placeholder="key">
+      <input class="create_node_add_value" type="text" placeholder="value">
+    </div>
+
+    <input type="submit" value="create node" class="btn btn-primary"/>
+  </div>
 </template>
+
+
 
 <template  name="node">
   <tr id="{{_id}}">
     <td class="name" contenteditable>{{name}}</td>
     <td>{{_id}}</td>
     <td><a href="#" class="update">update</a></td>
+    <td><a href="#" class="full">full</a></td>
     <td><a href="#" class="delete">delete</a></td>
   </tr>
 </template>

@@ -2,8 +2,8 @@
 
 TODO
 =========================
-node arbitrary structure
 edge autocomplete search
+update node arbitrary structure
 node type
 delete cleanup dependent things 
 
@@ -13,6 +13,12 @@ Nodes = new Meteor.Collection("nodes");
 Edges = new Meteor.Collection("edges");
 
 if (Meteor.isClient) {
+
+  $('#create_node_add_kv_pair').live('click', function(){
+    console.log('cl');
+    $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.kv_pairs_container') )
+    return false;
+  })
 
   var nodes_for_graph
   var edges_for_graph
@@ -28,10 +34,23 @@ if (Meteor.isClient) {
     'click input[type=submit]' : function () { 
 
       new_node_name = $('#new_node_name')
-      Nodes.insert({
+      node_object = {
         name: new_node_name.val(),
         time: Date.now()
-      });
+      }
+
+      key_value_pairs = $('.kv_pairs_container .kv_pair')
+      for (var i = 0, len = key_value_pairs.length-1; i <= len; i++) {
+        kv_pair = key_value_pairs.eq(i)
+        key = kv_pair.find('.create_node_add_key').val()
+        value = kv_pair.find('.create_node_add_value').val()
+        console.log(key, value);
+        node_object[key] = value;
+      };
+
+
+
+      Nodes.insert( node_object );
 
       new_node_name.val('')
       draw_graph();
@@ -53,6 +72,12 @@ if (Meteor.isClient) {
     'click .delete' : function(){
       Nodes.remove( { '_id' : this._id} )
       draw_graph();
+      return false;
+    },
+
+    'click .full' : function(){
+      node = Nodes.findOne( { '_id' : this._id} )
+      full(node);
       return false;
     } 
   })
@@ -116,7 +141,16 @@ if (Meteor.isServer) {
 
 
 
-
+function full(node){
+  s = ''
+  for (var key in node) {
+      if (node.hasOwnProperty(key)) {
+        s += key + ' : ' + node[key] + '<br>';
+      }
+  }
+  $('tr#'+node._id).after('<tr id="'+node._id+'-full"><td colspan="5" style="padding:30px;"></td></tr>')
+  $('tr#'+node._id+'-full td').html(s)
+}
 
 
 

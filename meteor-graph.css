@@ -9,3 +9,10 @@ h1{font-size: 24px;font-weight: normal;}
   min-height: 500px;
   width: 100%;
 }
+#kv_pair_template{
+  display: none;
+}
+.btn-primary{
+  display: block;
+  margin-top: 10px;
+}
