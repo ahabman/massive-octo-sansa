@@ -1,13 +1,31 @@
+/*
+
+TODO
+=========================
+node arbitrary structure
+edge autocomplete search
+node type
+delete cleanup dependent things 
+
+*/
+
 Nodes = new Meteor.Collection("nodes");
 Edges = new Meteor.Collection("edges");
 
 if (Meteor.isClient) {
 
+  var nodes_for_graph
+  var edges_for_graph
+
   Meteor.startup(function () {
+    Meteor.setTimeout(draw_graph, 1000) 
   });
 
+  Meteor.subscribe("all-nodes", function() {});
+  Meteor.subscribe("all-edges", function() {});
+
   Template.create_node.events({
-    'click input[type=submit]' : function () { // template data, if any, is available in 'this'
+    'click input[type=submit]' : function () { 
 
       new_node_name = $('#new_node_name')
       Nodes.insert({
@@ -15,8 +33,9 @@ if (Meteor.isClient) {
         time: Date.now()
       });
 
-      new_node_name.html('')
-    }
+      new_node_name.val('')
+      draw_graph();
+    } 
   });
 
   Template.nodes.nodes = function(){
@@ -27,14 +46,61 @@ if (Meteor.isClient) {
     'click .update' : function(){
       new_name = $('#'+this._id+ ' .name').html()
       Nodes.update( { '_id' : this._id}, {$set: {name: new_name}} );
+      draw_graph();
       return false;
     },
 
     'click .delete' : function(){
       Nodes.remove( { '_id' : this._id} )
+      draw_graph();
+      return false;
+    } 
+  })
+
+
+
+  Template.create_edge.events({
+    'click input[type=submit]' : function () { // template data, if any, is available in 'this'
+
+      create_edge_n1_id = $('#create_edge_n1_id')
+      create_edge_n2_id = $('#create_edge_n2_id')
+      create_edge_name = $('#create_edge_name')
+
+      Edges.insert({
+        n1: create_edge_n1_id.val(),
+        n2: create_edge_n2_id.val(),
+        name: create_edge_name.val(),
+        time: Date.now()
+      });
+
+      create_edge_n1_id.val('')
+      create_edge_n2_id.val('')
+      create_edge_name.val('')
+      draw_graph();
+    },
+
+  });
+
+  Template.edges.edges = function(){
+      return Edges.find({}, { sort: { time: -1 }});
+  }
+  Template.edges.events({
+    'click .update' : function(){
+      new_name = $('#'+this._id+ ' .name').html()
+      Edges.update( { '_id' : this._id}, {$set: {name: new_name}} );
+      draw_graph();
+      return false;
+    },
+
+    'click .delete' : function(){
+      Edges.remove( { '_id' : this._id} );
+      draw_graph();
       return false;
     }
   })
+
+
+
 }
 
 if (Meteor.isServer) {
@@ -46,3 +112,90 @@ if (Meteor.isServer) {
     return Edges.find(); // everything
   });
 }
+
+
+
+
+
+
+
+
+
+ function draw_graph(){
+
+  nodes_cursor = Nodes.find()
+  nodes_for_graph = nodes_cursor.map(function(node, index, cursor){
+    return {data: {id: node._id, name: node.name}}
+  })
+  
+  edges_cursor = Edges.find()
+  edges_for_graph = edges_cursor.map(function(edge, index, cursor){
+    return {data: {name: edge.name, source: edge.n1, target: edge.n2}}
+  })
+
+
+  $('#cy').cytoscape({
+    style: cytoscape.stylesheet()
+      .selector('node')
+        .css({
+          'content': 'data(name)',
+          'text-valign': 'center',
+          'color': 'white',
+          'text-outline-width': 2,
+          'text-outline-color': '#888'
+        })
+      .selector('edge')
+        .css({
+          'content':'data(name)',
+          'text-valign': 'center',
+          'font-size' : '10px',
+          'color': 'gray',
+          'target-arrow-shape': 'triangle'
+        })
+      .selector(':selected')
+        .css({
+          'background-color': 'black',
+          'line-color': 'black',
+          'target-arrow-color': 'black',
+          'source-arrow-color': 'black'
+        })
+      .selector('.faded')
+        .css({
+          'opacity': 0.25,
+          'text-opacity': 0
+        }),
+    
+    elements: {
+      nodes: nodes_for_graph,
+      edges: edges_for_graph
+    },
+    
+    ready: function(){
+      window.cy = this;
+      
+      // giddy up...
+      
+      cy.elements().unselectify();
+      
+      cy.on('tap', 'node', function(e){
+        var node = e.cyTarget; 
+        var neighborhood = node.neighborhood().add(node);
+        
+        cy.elements().addClass('faded');
+        neighborhood.removeClass('faded');
+      });
+      
+      cy.on('tap', function(e){
+        if( e.cyTarget === cy ){
+          cy.elements().removeClass('faded');
+        }
+      });
+    }
+  });
+
+
+
+
+
+
+ }

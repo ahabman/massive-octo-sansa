@@ -1,29 +1,71 @@
 <body>
   <div class="container">
-    {{> nodes}}
+    <div class="row">
+      <div class="col-xs-6">
+        {{> edges}}
+        
+        {{> nodes}}
+      </div>
+      <div class="col-xs-6">
+        <div id="cy"></div>
+      </div>
+    </div>
   </div>
 </body>
 
-<template name="create_node">
-  <input id="new_node_name" class="form-control" type="text" value="" placeholder="create node"/>
+
+<template name="edges">
+  <h1>edges</h1>
+  {{> create_edge}}<br><br>
+  <table class="table table-striped">
+    <tr><td>n1</td><td>name</td><td>n2</td></tr>
+    {{#each edges}}
+        {{> edge}}
+    {{/each}}
+  </table>
+</template>
+
+<template name="create_edge">
+  n1: <input id="create_edge_n1_id" class="form-control" placeholder="node 1 ID" type="text" value="">
+  relation: <input id="create_edge_name" class="form-control" type="text" value="" placeholder="create edge"/>
+  n2: <input id="create_edge_n2_id" class="form-control" placeholder="node 2 ID" type="text" value=""><br>
   <input type="submit" value="create" class="btn btn-primary"/>
 </template>
+
+<template name="edge">
+  <tr id="{{_id}}">
+    <td class="n1" contenteditable>{{n1}}</td>
+    <td class="name" contenteditable>{{name}}</td>
+    <td class="n2" contenteditable>{{n2}}</td>
+    <td><a href="#" class="update">update</a></td>
+    <td><a href="#" class="delete">delete</a></td>
+  </tr>
+</template>
+
+
+
+
 
 <template name="nodes">
   <h1>nodes</h1>
   {{> create_node}}<br><br>
   <table class="table table-striped">
-    <tr><td>name</td><td>time</td></tr>
+    <tr><td>name</td><td>id</td></tr>
     {{#each nodes}}
         {{> node}}
     {{/each}}
   </table>
 </template>
 
+<template name="create_node">
+  <input id="new_node_name" class="form-control" type="text" value="" placeholder="create node"/>
+  <input type="submit" value="create" class="btn btn-primary"/>
+</template>
+
 <template  name="node">
   <tr id="{{_id}}">
     <td class="name" contenteditable>{{name}}</td>
-    <td>{{time}}</td>
+    <td>{{_id}}</td>
     <td><a href="#" class="update">update</a></td>
     <td><a href="#" class="delete">delete</a></td>
   </tr>
