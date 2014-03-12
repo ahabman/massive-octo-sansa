@@ -2,10 +2,14 @@
 
 TODO
 =========================
-edge autocomplete search
-update node arbitrary structure
 node type
 delete cleanup dependent things 
+graph instances, sets
+redraw graph when data is updated locally
+redraw graph when data is updated remotely
+end user build dynamic queries
+text export 
+text import 
 
 */
 
@@ -15,8 +19,11 @@ Edges = new Meteor.Collection("edges");
 if (Meteor.isClient) {
 
   $('#create_node_add_kv_pair').live('click', function(){
-    console.log('cl');
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.kv_pairs_container') )
+    return false;
+  })
+  $('#edit_node_add_kv_pair').live('click', function(){
+    $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.edit_kv_pairs_container') )
     return false;
   })
 
@@ -25,6 +32,7 @@ if (Meteor.isClient) {
 
   Meteor.startup(function () {
     Meteor.setTimeout(draw_graph, 1000) 
+    Meteor.setTimeout(autocomplete, 1000) 
   });
 
   Meteor.subscribe("all-nodes", function() {});
@@ -61,11 +69,79 @@ if (Meteor.isClient) {
       return Nodes.find({}, { sort: { time: -1 }});
   }
 
-  Template.node.events({
-    'click .update' : function(){
-      new_name = $('#'+this._id+ ' .name').html()
-      Nodes.update( { '_id' : this._id}, {$set: {name: new_name}} );
+  Template.edit_node.events({
+    'click #update_node': function(){
+
+      // start with name
+      node_object = {name: $('#edit_node_name').val()}
+
+      // gather fileds to remove (if value is '')
+      unset = {}
+
+      key_value_pairs = $('.edit_kv_pairs_container .kv_pair')
+      for (var i = 0, len = key_value_pairs.length-1; i <= len; i++) {
+        kv_pair = key_value_pairs.eq(i);
+        key = kv_pair.find('.create_node_add_key').val();
+        value = kv_pair.find('.create_node_add_value').val();
+
+        // remove attr if value is emtpy string
+        if(value==''){ 
+          unset[key] = '';
+        }
+        // update field
+        else{
+          node_object[key] = value;
+        }
+      };
+
+      // save and remove id. mongo doesn't want it in node_object
+      node_id = node_object._id;
+      delete node_object._id;
+
+      Nodes.update( { '_id' : node_id}, {$set: node_object, $unset: unset} );
+
+      // reset
       draw_graph();
+      $('.edit_kv_pairs_container').html('');
+      $('#edit_node_name').val('');
+      return false;
+    }
+  })
+
+  Template.node.events({
+    // 'click .update' : function(){
+    //   new_name = $('#'+this._id+ ' .name').html()
+    //   Nodes.update( { '_id' : this._id}, {$set: {name: new_name}} );
+    //   draw_graph();
+    //   return false;
+    // },
+
+    'click .edit' : function(){
+
+      // reset
+      $('.edit_kv_pairs_container').html('');
+      $('#edit_node_name').val('');
+
+      node_name = $('#'+this._id+ ' .name').html()
+      $('#edit_node_name').val( node_name )
+
+      for (var key in this) {
+          if (this.hasOwnProperty(key)) {
+
+            // name is special, handled separately
+            if(key=='name') continue;
+
+            kv_template = $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.edit_kv_pairs_container') )
+            kv_template.find('.create_node_add_key').val( key )
+            kv_template.find('.create_node_add_value').val( this[key] )
+            
+            // don't allow id to changed
+            if(key=='_id'){
+              kv_template.hide();
+            }
+          }
+      }
+
       return false;
     },
 
@@ -139,7 +215,24 @@ if (Meteor.isServer) {
 }
 
 
+function autocomplete(){
 
+  nodes_cursor = Nodes.find()
+  nodes_for_autocomplete = nodes_cursor.map(function(node, index, cursor){
+    return {data: node._id, value: node.name}
+  })
+
+  options = { 
+    lookup: nodes_for_autocomplete,
+    onSelect: function (suggestion) {
+      console.log(this);
+      console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+      $(this).val( suggestion.data )
+    }
+  };
+  $('#create_edge_n1_id, #create_edge_n2_id').autocomplete(options);
+
+}
 
 function full(node){
   s = ''
@@ -152,16 +245,13 @@ function full(node){
   $('tr#'+node._id+'-full td').html(s)
 }
 
-
-
-
- function draw_graph(){
+function draw_graph(){
 
   nodes_cursor = Nodes.find()
   nodes_for_graph = nodes_cursor.map(function(node, index, cursor){
     return {data: {id: node._id, name: node.name}}
   })
-  
+
   edges_cursor = Edges.find()
   edges_for_graph = edges_cursor.map(function(edge, index, cursor){
     return {data: {name: edge.name, source: edge.n1, target: edge.n2}}
@@ -203,9 +293,11 @@ function full(node){
       nodes: nodes_for_graph,
       edges: edges_for_graph
     },
-    
+
     ready: function(){
       window.cy = this;
+
+
       
       // giddy up...
       
@@ -228,8 +320,9 @@ function full(node){
   });
 
 
+  layouts = ['random', 'grid', 'circle', 'breadthfirst', 'arbor', 'cose'];
+  random_layout = layouts[Math.floor(Math.random()*layouts.length)];
+  setTimeout("cy.layout({ name: '"+random_layout+"' });", 100)
+  
 
-
-
-
- }
+}

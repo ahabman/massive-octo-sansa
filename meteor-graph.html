@@ -53,6 +53,7 @@
 <template name="nodes">
   <h1>nodes</h1>
   {{> create_node}}
+  {{> edit_node}}
   <table class="table table-striped">
     <thead>
       <tr><th>name</th><th>id</th></tr>
@@ -83,13 +84,27 @@
 </template>
 
 
+<template name="edit_node">
+  <div class="well">
+    <input id="edit_node_name" class="form-control" type="text" value="" placeholder="node name"/>
+
+    <div class="edit_kv_pairs_container"></div>
+
+    <a href="#" id="edit_node_add_kv_pair" class="label label-info">add key:value</a>
+
+    <input type="submit" id="update_node" value="update node" class="btn btn-primary"/>
+  </div>
+</template>
+
+
 
 <template  name="node">
   <tr id="{{_id}}">
     <td class="name" contenteditable>{{name}}</td>
     <td>{{_id}}</td>
-    <td><a href="#" class="update">update</a></td>
-    <td><a href="#" class="full">full</a></td>
+    <td><a href="#" class="edit">edit</a></td>
+    <!-- <td><a href="#" class="update">update</a></td> -->
+    <td><a href="#" class="full">show</a></td>
     <td><a href="#" class="delete">delete</a></td>
   </tr>
 </template>
