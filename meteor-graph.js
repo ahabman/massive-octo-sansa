@@ -2,13 +2,13 @@
 
 TODO
 =========================
-node type
-delete cleanup dependent things 
 graph instances, sets
 redraw graph when data is updated locally
 redraw graph when data is updated remotely
 end user build dynamic queries
-text export 
+node type
+delete cleanup dependent things 
+text export (.dot ?)
 text import 
 
 */
@@ -17,6 +17,14 @@ Nodes = new Meteor.Collection("nodes");
 Edges = new Meteor.Collection("edges");
 
 if (Meteor.isClient) {
+
+  var nodes_for_graph
+  var edges_for_graph
+
+  Meteor.startup(function () {
+    Meteor.setTimeout(draw_graph, 1000) 
+    Meteor.setTimeout(autocomplete, 1000) 
+  });
 
   $('#create_node_add_kv_pair').live('click', function(){
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.kv_pairs_container') )
@@ -27,17 +35,67 @@ if (Meteor.isClient) {
     return false;
   })
 
-  var nodes_for_graph
-  var edges_for_graph
-
-  Meteor.startup(function () {
-    Meteor.setTimeout(draw_graph, 1000) 
-    Meteor.setTimeout(autocomplete, 1000) 
-  });
-
   Meteor.subscribe("all-nodes", function() {});
   Meteor.subscribe("all-edges", function() {});
 
+  /* NODES */
+  /* bind node data */
+  Template.nodes.nodes = function(){
+      return Nodes.find({}, { sort: { time: -1 }});
+  }
+
+  /* bind node events */
+  Template.node.events({
+    // 'click .update' : function(){
+    //   new_name = $('#'+this._id+ ' .name').html()
+    //   Nodes.update( { '_id' : this._id}, {$set: {name: new_name}} );
+    //   draw_graph();
+    //   return false;
+    // },
+
+    'click .edit' : function(){
+
+      // reset
+      $('.edit_kv_pairs_container').html('');
+      $('#edit_node_name').val('');
+      $('#create_node_container').hide();
+      $('#edit_node_container').show();
+
+      node_name = $('#'+this._id+ ' .name').html()
+      $('#edit_node_name').val( node_name )
+
+      for (var key in this) {
+          if (this.hasOwnProperty(key)) {
+
+            // name is special, handled separately
+            if(key=='name') continue;
+
+            kv_template = $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.edit_kv_pairs_container') )
+            kv_template.find('.create_node_add_key').val( key )
+            kv_template.find('.create_node_add_value').val( this[key] )
+            
+            // don't allow id to changed
+            if(key=='_id'){
+              kv_template.hide();
+            }
+          }
+      }
+    },
+
+    'click .delete' : function(){
+      Nodes.remove( { '_id' : this._id} )
+      draw_graph();
+      return false;
+    },
+
+    'click .full' : function(){
+      node = Nodes.findOne( { '_id' : this._id} )
+      full(node);
+      return false;
+    } 
+  })
+
+  /* bind node create events */
   Template.create_node.events({
     'click input[type=submit]' : function () { 
 
@@ -62,13 +120,11 @@ if (Meteor.isClient) {
 
       new_node_name.val('')
       draw_graph();
+      autocomplete();
     } 
   });
 
-  Template.nodes.nodes = function(){
-      return Nodes.find({}, { sort: { time: -1 }});
-  }
-
+  /* bind node edit events */
   Template.edit_node.events({
     'click #update_node': function(){
 
@@ -104,62 +160,35 @@ if (Meteor.isClient) {
       draw_graph();
       $('.edit_kv_pairs_container').html('');
       $('#edit_node_name').val('');
+      $('#edit_node_container').hide();
+      $('#create_node_container').show();
       return false;
     }
-  })
+  });
 
-  Template.node.events({
-    // 'click .update' : function(){
-    //   new_name = $('#'+this._id+ ' .name').html()
-    //   Nodes.update( { '_id' : this._id}, {$set: {name: new_name}} );
-    //   draw_graph();
-    //   return false;
-    // },
+  /* EDGES */
+  /* bind edge data */
+  Template.edges.edges = function(){
+      return Edges.find({}, { sort: { time: -1 }});
+  }
 
-    'click .edit' : function(){
-
-      // reset
-      $('.edit_kv_pairs_container').html('');
-      $('#edit_node_name').val('');
-
-      node_name = $('#'+this._id+ ' .name').html()
-      $('#edit_node_name').val( node_name )
-
-      for (var key in this) {
-          if (this.hasOwnProperty(key)) {
-
-            // name is special, handled separately
-            if(key=='name') continue;
-
-            kv_template = $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.edit_kv_pairs_container') )
-            kv_template.find('.create_node_add_key').val( key )
-            kv_template.find('.create_node_add_value').val( this[key] )
-            
-            // don't allow id to changed
-            if(key=='_id'){
-              kv_template.hide();
-            }
-          }
-      }
-
-      return false;
-    },
-
-    'click .delete' : function(){
-      Nodes.remove( { '_id' : this._id} )
+  /* bind edge events */
+  Template.edges.events({
+    'click .update' : function(){
+      new_name = $('#'+this._id+ ' .name').html()
+      Edges.update( { '_id' : this._id}, {$set: {name: new_name}} );
       draw_graph();
       return false;
     },
 
-    'click .full' : function(){
-      node = Nodes.findOne( { '_id' : this._id} )
-      full(node);
+    'click .delete' : function(){
+      Edges.remove( { '_id' : this._id} );
+      draw_graph();
       return false;
-    } 
+    }
   })
 
-
-
+  /* bind edge create events */
   Template.create_edge.events({
     'click input[type=submit]' : function () { // template data, if any, is available in 'this'
 
@@ -179,28 +208,7 @@ if (Meteor.isClient) {
       create_edge_name.val('')
       draw_graph();
     },
-
   });
-
-  Template.edges.edges = function(){
-      return Edges.find({}, { sort: { time: -1 }});
-  }
-  Template.edges.events({
-    'click .update' : function(){
-      new_name = $('#'+this._id+ ' .name').html()
-      Edges.update( { '_id' : this._id}, {$set: {name: new_name}} );
-      draw_graph();
-      return false;
-    },
-
-    'click .delete' : function(){
-      Edges.remove( { '_id' : this._id} );
-      draw_graph();
-      return false;
-    }
-  })
-
-
 
 }
 
@@ -231,7 +239,6 @@ function autocomplete(){
     }
   };
   $('#create_edge_n1_id, #create_edge_n2_id').autocomplete(options);
-
 }
 
 function full(node){
@@ -323,6 +330,4 @@ function draw_graph(){
   layouts = ['random', 'grid', 'circle', 'breadthfirst', 'arbor', 'cose'];
   random_layout = layouts[Math.floor(Math.random()*layouts.length)];
   setTimeout("cy.layout({ name: '"+random_layout+"' });", 100)
-  
-
 }

@@ -2,12 +2,36 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-6">
-        {{> nodes}}<hr>
-        {{> edges}}
+        <div id="create_node_container">
+          <h1>create a node</h1>
+          {{> create_node}}
+        </div>
+        <div id="edit_node_container">
+          <h1>edit a node</h1>
+          {{> edit_node}}
+        </div>
       </div>
       <div class="col-xs-6">
+        <div id="create_edge_container">
+          <h1>create a edge</h1>
+          {{> create_edge}}
+        </div>
+
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12">
         <div id="cy"></div>
       </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-6">
+        {{> nodes}}
+      </div>
+      <div class="col-xs-6">
+        {{> edges}}
+      </div>
+
     </div>
   </div>
 </body>
@@ -15,7 +39,6 @@
 
 <template name="edges">
   <h1>edges</h1>
-  {{> create_edge}}<br>
   <table class="table table-striped">
     <thead>
       <tr><th>node 1 id</th><th>name</th><th>node 2 id</th></tr>
@@ -52,8 +75,6 @@
 
 <template name="nodes">
   <h1>nodes</h1>
-  {{> create_node}}
-  {{> edit_node}}
   <table class="table table-striped">
     <thead>
       <tr><th>name</th><th>id</th></tr>
