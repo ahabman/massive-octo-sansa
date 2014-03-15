@@ -3,6 +3,7 @@
 TODO
 =========================
 graph instances, sets
+graph icon buttons
 redraw graph when data is updated locally
 redraw graph when data is updated remotely
 end user build dynamic queries
@@ -13,8 +14,9 @@ text import
 
 */
 
-Nodes = new Meteor.Collection("nodes");
-Edges = new Meteor.Collection("edges");
+Graphs = new Meteor.Collection('graphs');
+Nodes = new Meteor.Collection('nodes');
+Edges = new Meteor.Collection('edges');
 
 if (Meteor.isClient) {
 
@@ -26,6 +28,11 @@ if (Meteor.isClient) {
     Meteor.setTimeout(autocomplete, 1000) 
   });
 
+  Meteor.subscribe('all-graphs');
+  Meteor.subscribe('all-nodes');
+  Meteor.subscribe('all-edges');
+  // Meteor.subscribe('current-graph-nodes', { graph_id: Session.get('currentGraphId') });
+
   $('#create_node_add_kv_pair').live('click', function(){
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.kv_pairs_container') )
     return false;
@@ -35,13 +42,88 @@ if (Meteor.isClient) {
     return false;
   })
 
-  Meteor.subscribe("all-nodes", function() {});
-  Meteor.subscribe("all-edges", function() {});
+
+  /* GRAPHS */
+  /* bind graphs data */
+  Template.graphs.graphs = function(){
+      return Graphs.find({}, { sort: { time: -1 }});
+  }
+  Template.graphs.current_graph = function(){
+    return Graphs.findOne({_id: Session.get('currentGraphId') });
+  }
+
+  Template.graphs.events({
+    'click #create_graph' : function(){
+
+      new_graph_name = $('#new_graph_name')
+      graph_object = {
+        name: new_graph_name.val(),
+        time: Date.now()
+      }
+
+      Graphs.insert( graph_object );
+      new_graph_name.val('');
+      return false;
+    }
+  })
+
+  Template.graph.events({
+    'click .show' : function(){
+
+      Deps.autorun(function () {
+        // Meteor.subscribe("chat-history", {room: Session.get("currentRoomId")});
+        Meteor.subscribe("current-graph", {_id: Session.get("currentGraphId")});
+        autocomplete();
+      });
+
+      // Causes the function passed to Deps.autorun to be re-run, so
+      // that the chat-history subscription is moved to the room "home".
+      Session.set("currentGraphId", this._id);
+
+      draw_graph(); 
+      return false;
+    },
+
+    'click .delete' : function(){
+
+      Graphs.remove( { '_id' : this._id} );
+      draw_graph(); // ?
+      return false;
+    },
+  })
+
+
+  Template.nav.graphs = function(){
+      return Graphs.find({}, { sort: { time: -1 }});
+  }
+  Template.nav.current_graph = function(){
+    return Graphs.findOne({_id: Session.get('currentGraphId') });
+  }
+  Template.nav.events({
+    'click a' : function(){
+
+      Deps.autorun(function () {
+        // Meteor.subscribe("chat-history", {room: Session.get("currentRoomId")});
+        Meteor.subscribe("current-graph", {_id: Session.get("currentGraphId")});
+        autocomplete();
+      });
+
+      // Causes the function passed to Deps.autorun to be re-run, so
+      // that the chat-history subscription is moved to the room "home".
+      Session.set("currentGraphId", this._id);
+
+      draw_graph(); 
+      return false;
+    }
+  })
+
+
+
 
   /* NODES */
   /* bind node data */
   Template.nodes.nodes = function(){
-      return Nodes.find({}, { sort: { time: -1 }});
+      return Nodes.find({graph_id: Session.get('currentGraphId')}, { sort: { time: -1 }});
   }
 
   /* bind node events */
@@ -101,6 +183,7 @@ if (Meteor.isClient) {
 
       new_node_name = $('#new_node_name')
       node_object = {
+        graph_id: Session.get('currentGraphId'),
         name: new_node_name.val(),
         time: Date.now()
       }
@@ -110,11 +193,8 @@ if (Meteor.isClient) {
         kv_pair = key_value_pairs.eq(i)
         key = kv_pair.find('.create_node_add_key').val()
         value = kv_pair.find('.create_node_add_value').val()
-        console.log(key, value);
         node_object[key] = value;
       };
-
-
 
       Nodes.insert( node_object );
 
@@ -169,7 +249,7 @@ if (Meteor.isClient) {
   /* EDGES */
   /* bind edge data */
   Template.edges.edges = function(){
-      return Edges.find({}, { sort: { time: -1 }});
+      return Edges.find({graph_id: Session.get('currentGraphId')}, { sort: { time: -1 }});
   }
 
   /* bind edge events */
@@ -197,6 +277,7 @@ if (Meteor.isClient) {
       create_edge_name = $('#create_edge_name')
 
       Edges.insert({
+        graph_id: Session.get('currentGraphId'),
         n1: create_edge_n1_id.val(),
         n2: create_edge_n2_id.val(),
         name: create_edge_name.val(),
@@ -209,14 +290,22 @@ if (Meteor.isClient) {
       draw_graph();
     },
   });
-
 }
 
 if (Meteor.isServer) {
 
+  Meteor.publish("all-graphs", function () {
+    return Graphs.find(); // everything
+  });
+  Meteor.publish("current-graph", function (graph_id) {
+    return Graphs.find( {_id: graph_id} ); // current
+  });
   Meteor.publish("all-nodes", function () {
     return Nodes.find(); // everything
   });
+  // Meteor.publish("current-graph-nodes", function (graph_id) {
+  //   return Nodes.find( { 'graph_id': graph_id } );
+  // });
   Meteor.publish("all-edges", function () {
     return Edges.find(); // everything
   });
@@ -225,7 +314,7 @@ if (Meteor.isServer) {
 
 function autocomplete(){
 
-  nodes_cursor = Nodes.find()
+  nodes_cursor = Nodes.find({graph_id: Session.get('currentGraphId')})
   nodes_for_autocomplete = nodes_cursor.map(function(node, index, cursor){
     return {data: node._id, value: node.name}
   })
@@ -233,8 +322,6 @@ function autocomplete(){
   options = { 
     lookup: nodes_for_autocomplete,
     onSelect: function (suggestion) {
-      console.log(this);
-      console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
       $(this).val( suggestion.data )
     }
   };
@@ -254,12 +341,12 @@ function full(node){
 
 function draw_graph(){
 
-  nodes_cursor = Nodes.find()
+  nodes_cursor = Nodes.find({graph_id: Session.get('currentGraphId')})
   nodes_for_graph = nodes_cursor.map(function(node, index, cursor){
     return {data: {id: node._id, name: node.name}}
   })
 
-  edges_cursor = Edges.find()
+  edges_cursor = Edges.find({graph_id: Session.get('currentGraphId')})
   edges_for_graph = edges_cursor.map(function(edge, index, cursor){
     return {data: {name: edge.name, source: edge.n1, target: edge.n2}}
   })

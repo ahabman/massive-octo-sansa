@@ -20,9 +20,32 @@ h1{font-size: 24px;font-weight: normal;}
 
 
 #create_edge_container input,
-.kv_pair input{
+.kv_pair input,
+nav input{
   display: inline-block;
 }
 #create_edge_container input{
   width:30%;
+}
+
+
+.navbar .current_graph_name{
+  display: inline-block;
+  font-size: 32px;
+  margin-left:15px;
+
+}
+.navbar .create_graph_container{
+  float:right;
+  width:400px;
+}
+.navbar .create_graph_container input{
+  display: inline-block;
+  float:left;
+  width:300px;
+}
+.navbar .btn-group,
+.navbar .create_graph_container input,
+.navbar .create_graph_container a.btn{
+  margin:20px 0;
 }

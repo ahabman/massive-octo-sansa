@@ -1,4 +1,7 @@
 <body>
+  
+  {{> nav}}
+
   <div class="container">
     <div class="row">
       <div class="col-xs-6">
@@ -16,7 +19,6 @@
           <h1>create a edge</h1>
           {{> create_edge}}
         </div>
-
       </div>
     </div>
     <div class="row">
@@ -31,10 +33,42 @@
       <div class="col-xs-6">
         {{> edges}}
       </div>
+    </div>
 
+    <div class="row">
+      <div class="col-xs-6">
+        {{> graphs}}
+      </div>
     </div>
   </div>
 </body>
+
+
+<template name="graphs">
+  <h1>current = {{ current_graph.name }}</h1>
+  <h1>graphs</h1>
+  <input id="new_graph_name" placeholder="name" type="text">
+  <a href="#" id="create_graph" class="btn">create</a>
+  <table class="table table-striped">
+    <thead>
+      <tr><th>name</th><th>id</th></tr>
+    </thead>
+    <tbody>
+      {{#each graphs}}
+          {{> graph}}
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="graph">
+  <tr id="{{_id}}">
+    <td class="">{{name}}</td>
+    <td class="">{{_id}}</td>
+    <td><a href="#" class="show">show</a></td>
+    <td><a href="#" class="delete">delete</a></td>
+  </tr>
+</template>
 
 
 <template name="edges">
@@ -77,7 +111,7 @@
   <h1>nodes</h1>
   <table class="table table-striped">
     <thead>
-      <tr><th>name</th><th>id</th></tr>
+      <tr><th>name</th><th class="hidden-sm">id</th></tr>
     </thead>
     <tbody>
       {{#each nodes}}
@@ -122,10 +156,45 @@
 <template  name="node">
   <tr id="{{_id}}">
     <td class="name" contenteditable>{{name}}</td>
-    <td>{{_id}}</td>
+    <td class="hidden-sm">{{_id}}</td>
     <td><a href="#" class="edit">edit</a></td>
     <!-- <td><a href="#" class="update">update</a></td> -->
     <td><a href="#" class="full">show</a></td>
     <td><a href="#" class="delete">delete</a></td>
   </tr>
+</template>
+
+
+
+<template name="nav">
+
+
+
+
+
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          Select <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          {{#each graphs}}
+              <li>
+                <a href="#" class="show">{{name}}</a> 
+              </li>
+          {{/each}}
+        </ul>
+      </div>
+
+      <span class="current_graph_name">{{ current_graph.name }}</span>
+
+      <div class="create_graph_container">
+        <input id="new_graph_name" class="form-control" placeholder="graph name" type="text">
+        <a href="#" class="btn btn-default" id="create_graph">create</a>
+      </div>
+
+    </div><!-- /.container-fluid -->
+  </nav>
 </template>
