@@ -46,6 +46,33 @@ if (Meteor.isClient) {
     return false;
   })
 
+  function fullscreen(on){
+    if(on){
+      $('#cy').prependTo('body');
+      $('#cy').css('position', 'fixed');
+      $('#cy').css('width', $(window).width() );
+      $('#cy').css('height', $(window).height());
+      $('#exit-fullscreen').show();
+    }
+    if(!on){
+      $('#cy').prependTo('.graph-container');
+      $('#cy').css('position', 'relative');
+      $('#cy').css('width', 'auto' );
+      $('#cy').css('height', 'auto');
+      $('#exit-fullscreen').hide();
+    }
+    draw_graph();
+  }
+
+  $('a#fullscreen').live('click', function(){
+    fullscreen(true);
+    return false;
+  })
+  $('a#exit-fullscreen').live('click', function(){
+    fullscreen(false);
+    return false;
+  })
+
 
   /* GRAPHS */
   /* bind graphs data */
@@ -373,6 +400,7 @@ function draw_graph(){
           'text-valign': 'center',
           'font-size' : '10px',
           'color': 'gray',
+          'line-color' : '#DDD',
           'target-arrow-shape': 'triangle'
         })
       .selector(':selected')
@@ -421,5 +449,6 @@ function draw_graph(){
 
   layouts = ['random', 'grid', 'circle', 'breadthfirst', 'arbor', 'cose'];
   random_layout = layouts[Math.floor(Math.random()*layouts.length)];
-  setTimeout("cy.layout({ name: '"+random_layout+"' });", 100)
+  // setTimeout("cy.layout({ name: '"+random_layout+"' });", 100)
+  setTimeout("cy.layout({ name: 'arbor' });", 100)
 }

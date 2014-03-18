@@ -14,13 +14,14 @@
       </div>
       <div class="col-xs-6">
         <div id="create_edge_container">
-          <h1>create a edge</h1>
+          <h1>create a relationship</h1>
           {{> create_edge}}
         </div>
       </div>
     </div>
     <div class="row">
-      <div class="col-xs-12">
+      <div class="col-xs-12 graph-container">
+
         <div id="cy"></div>
 
         <div class="graph-modes">
@@ -32,7 +33,8 @@
           <a href="#" class="graph-mode" title="cose">cose</a>
         </div>
 
-        
+        <a id="fullscreen" href="">&oplus;</a>
+        <a id="exit-fullscreen" href="">&otimes;</a>
 
       </div>
     </div>
@@ -51,7 +53,12 @@
       </div>
     </div>
 
+
+    <blockquote class="text-center" style="margin:100px 0px;">
+      <p class="lead">a collaborative medium to create and display artibrary data structures, and their relationships</p>
+    </blockquote>
   </div>
+
 </body>
 
 
@@ -82,7 +89,7 @@
 </template>
 
 <template name="edges">
-  <h1>edges</h1>
+  <h1>relationship</h1>
   <table class="table table-striped">
     <thead>
       <tr><th>node 1 id</th><th>name</th><th>node 2 id</th></tr>

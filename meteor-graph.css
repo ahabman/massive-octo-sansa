@@ -6,12 +6,34 @@ h1{font-size: 24px;font-weight: normal;}
   display: block;
   margin-top: 10px;
 }
+a:hover{
+  text-decoration: none;
+}
 
 #cy {
+  background-color: #FFF;
   border: solid 1px #CCC;
   height: 100%;
   min-height: 600px;
   width: 100%;
+  z-index: 1;
+}
+body.fullscreen #cy{
+  background-color:#BED4E9;
+}
+a#fullscreen,
+a#exit-fullscreen{
+  font-size: 32px;
+}
+
+a#exit-fullscreen{
+  background-color: rgba(255, 255, 255, 0.8);
+  display: none;
+  z-index: 2;
+  position:fixed;
+  top:0px;
+  left:0px;
+  padding:20px;
 }
 #kv_pair_template,
 #edit_node_container{
