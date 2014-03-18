@@ -2,9 +2,8 @@
 
 TODO
 =========================
-graph instances, sets
-graph icon buttons
-redraw graph when data is updated locally
+fullscreen
+update/delete graph set
 redraw graph when data is updated remotely
 end user build dynamic queries
 node type
@@ -39,6 +38,11 @@ if (Meteor.isClient) {
   })
   $('#edit_node_add_kv_pair').live('click', function(){
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.edit_kv_pairs_container') )
+    return false;
+  })
+  $('.graph-modes a').live('click', function(){
+    cy.layout({ name: $(this).html() });
+    Session.set("currentGraphMode", $(this).html() );
     return false;
   })
 
@@ -198,7 +202,8 @@ if (Meteor.isClient) {
 
       Nodes.insert( node_object );
 
-      new_node_name.val('')
+      new_node_name.val('');
+      $('.kv_pairs_container').html('');
       draw_graph();
       autocomplete();
     } 
