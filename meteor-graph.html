@@ -1,7 +1,5 @@
 <body>
-  
   {{> nav}}
-
   <div class="container">
     <div class="row">
       <div class="col-xs-6">
@@ -52,6 +50,7 @@
         {{> graphs}}
       </div>
     </div>
+
   </div>
 </body>
 
@@ -81,7 +80,6 @@
     <td><a href="#" class="delete">delete</a></td>
   </tr>
 </template>
-
 
 <template name="edges">
   <h1>edges</h1>
@@ -115,9 +113,6 @@
     <td><a href="#" class="delete">delete</a></td>
   </tr>
 </template>
-
-
-
 
 <template name="nodes">
   <h1>nodes</h1>
@@ -163,8 +158,6 @@
   </div>
 </template>
 
-
-
 <template  name="node">
   <tr id="{{_id}}">
     <td class="name" contenteditable>{{name}}</td>
@@ -176,13 +169,7 @@
   </tr>
 </template>
 
-
-
 <template name="nav">
-
-
-
-
 
   <nav class="navbar navbar-default" role="navigation">
     <div class="container">
