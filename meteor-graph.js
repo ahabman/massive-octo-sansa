@@ -2,8 +2,6 @@
 
 TODO
 =========================
-fullscreen
-update/delete graph set
 redraw graph when data is updated remotely
 end user build dynamic queries
 node type
@@ -19,12 +17,18 @@ Edges = new Meteor.Collection('edges');
 
 if (Meteor.isClient) {
 
+
+  function get_full_mongo_node(id){
+    return Nodes.findOne( { '_id' : id} );
+  }
+
   var nodes_for_graph
   var edges_for_graph
 
   Meteor.startup(function () {
     Meteor.setTimeout(draw_graph, 1000) 
     Meteor.setTimeout(autocomplete, 1000) 
+    if($.cookie('data_tables_visibility')=='show') $('#data-tables').show();
   });
 
   Meteor.subscribe('all-graphs');
@@ -43,6 +47,14 @@ if (Meteor.isClient) {
   $('.graph-modes a').live('click', function(){
     cy.layout({ name: $(this).html() });
     Session.set("currentGraphMode", $(this).html() );
+    return false;
+  })
+
+  $('#toggle-data-tables').live('click', function(){
+    $('#data-tables').toggle();
+    current = $.cookie('data_tables_visibility');
+    new_state = current=='show' ? 'hide' : 'show' ;
+    $.cookie('data_tables_visibility', new_state);
     return false;
   })
 
@@ -112,6 +124,13 @@ if (Meteor.isClient) {
       Session.set("currentGraphId", this._id);
 
       draw_graph(); 
+      return false;
+    },
+
+    'click .update' : function(){
+      new_name = $('#'+this._id+ ' .name').html()
+      Graphs.update( { '_id' : this._id}, {$set: {name: new_name}} );
+      // draw_graph();
       return false;
     },
 
@@ -423,23 +442,36 @@ function draw_graph(){
 
     ready: function(){
       window.cy = this;
-
-
-      
-      // giddy up...
       
       cy.elements().unselectify();
       
-      cy.on('tap', 'node', function(e){
-        var node = e.cyTarget; 
+      cy.on('tap', 'node', function(event){
+        var node = event.cyTarget; 
         var neighborhood = node.neighborhood().add(node);
-        
+        /*
+        node._private
+        node._private.children
+        node._private.classes
+        node._private.data <<<<<<<
+        node._private.edges
+        node._private.ids (obj)
+        node._private.position
+        */
+        node_data = node._private.data;
+        full_mongo_node = get_full_mongo_node(node_data.id); // AWTODO why isn't this already full
+        details_string = '';
+        for (var key in full_mongo_node) {
+            if(key=='_id' || key=='graph_id' || key=='time' ) continue;
+            details_string += key + ' : ' + full_mongo_node[key] + '<br>';
+        }
+        $('#details').html(details_string);
+
         cy.elements().addClass('faded');
         neighborhood.removeClass('faded');
       });
       
-      cy.on('tap', function(e){
-        if( e.cyTarget === cy ){
+      cy.on('tap', function(event){
+        if( event.cyTarget === cy ){
           cy.elements().removeClass('faded');
         }
       });

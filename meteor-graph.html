@@ -39,23 +39,41 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-xs-6">
-        {{> nodes}}
-      </div>
-      <div class="col-xs-6">
-        {{> edges}}
+      <div class="col-sm-6 col-sm-push-3">
+        <div class="details-panel panel panel-default">
+          <div class="panel-body">
+            <div id="details" class="text-center"></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-xs-6">
-        {{> graphs}}
+
+    <div class="row" style="margin-top:50px;">
+      <div class="col-xs-12">
+        <p class="text-center"><a id="toggle-data-tables" href="#">toggle graph details <span class="caret"></span></a></p>
+      </div>
+    </div>
+    <div id="data-tables">
+      <div class="row">
+        <div class="col-xs-6">
+          {{> nodes}}
+        </div>
+        <div class="col-xs-6">
+          {{> edges}}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-6">
+          {{> graphs}}
+        </div>
       </div>
     </div>
 
 
     <blockquote class="text-center" style="margin:100px 0px;">
-      <p class="lead">a collaborative medium to create and display artibrary data structures, and their relationships</p>
+      <p class="lead">a collaborative medium to create and display<br>artibrary data structures, and their relationships</p>
     </blockquote>
   </div>
 
@@ -63,10 +81,11 @@
 
 
 <template name="graphs">
-  <h1>current = {{ current_graph.name }}</h1>
-  <h1>graphs</h1>
-  <input id="new_graph_name" placeholder="name" type="text">
-  <a href="#" id="create_graph" class="btn">create</a>
+  <h1>create a graph</h1>
+  <div class="well">
+    <input id="new_graph_name" placeholder="graph name" type="text">
+    <a href="#" id="create_graph" class="btn btn-primary">create</a>
+  </div>
   <table class="table table-striped">
     <thead>
       <tr><th>name</th><th>id</th></tr>
@@ -81,15 +100,16 @@
 
 <template name="graph">
   <tr id="{{_id}}">
-    <td class="">{{name}}</td>
+    <td class="name" contenteditable>{{name}}</td>
     <td class="">{{_id}}</td>
     <td><a href="#" class="show">show</a></td>
+    <td><a href="#" class="update">update</a></td>
     <td><a href="#" class="delete">delete</a></td>
   </tr>
 </template>
 
 <template name="edges">
-  <h1>relationship</h1>
+  <h1>relationships</h1>
   <table class="table table-striped">
     <thead>
       <tr><th>node 1 id</th><th>name</th><th>node 2 id</th></tr>
