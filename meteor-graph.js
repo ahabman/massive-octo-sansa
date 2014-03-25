@@ -2,7 +2,6 @@
 
 TODO
 =========================
-redraw graph when data is updated remotely
 end user build dynamic queries
 node type
 delete cleanup dependent things 
@@ -16,7 +15,6 @@ Nodes = new Meteor.Collection('nodes');
 Edges = new Meteor.Collection('edges');
 
 if (Meteor.isClient) {
-
 
   function get_full_mongo_node(id){
     return Nodes.findOne( { '_id' : id} );
@@ -35,6 +33,25 @@ if (Meteor.isClient) {
   Meteor.subscribe('all-nodes');
   Meteor.subscribe('all-edges');
   // Meteor.subscribe('current-graph-nodes', { graph_id: Session.get('currentGraphId') });
+
+
+  observe_methods = {
+    added: function(id, fields){
+      draw_graph();
+    },
+    changed: function(id, fields){
+      draw_graph();
+    },
+    removed: function(id, fields){
+      draw_graph();
+    }
+  }
+  nodes_cursor = Nodes.find({graph_id: Session.get('currentGraphId')});
+  nodes_cursor.observeChanges(observe_methods)
+
+  edges_cursor = Edges.find({graph_id: Session.get('currentGraphId')});
+  edges_cursor.observeChanges(observe_methods)
+
 
   $('#create_node_add_kv_pair').live('click', function(){
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.kv_pairs_container') )
