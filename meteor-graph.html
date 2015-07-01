@@ -112,7 +112,7 @@
   <h1>relationships</h1>
   <table class="table table-striped">
     <thead>
-      <tr><th>node 1 id</th><th>name</th><th>node 2 id</th></tr>
+      <tr><th>node 1</th><th>relation</th><th>node 2</th></tr>
     </thead>
     <tbody>
       {{#each edges}}
@@ -133,9 +133,9 @@
 
 <template name="edge">
   <tr id="{{_id}}">
-    <td class="n1" contenteditable>{{n1}}</td>
+    <td class="n1">{{node_name n1}}</td>
     <td class="name" contenteditable>{{name}}</td>
-    <td class="n2" contenteditable>{{n2}}</td>
+    <td class="n2">{{node_name n2}}</td>
     <td><a href="#" class="update">update</a></td>
     <td><a href="#" class="delete">delete</a></td>
   </tr>

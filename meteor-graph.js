@@ -358,6 +358,13 @@ if (Meteor.isClient) {
       draw_graph();
     },
   });
+
+  Template.edge.helpers({
+    'node_name': function(node_id) {
+      node = Nodes.findOne( node_id );
+      return node.name
+    }
+  })
 }
 
 if (Meteor.isServer) {
@@ -499,5 +506,5 @@ function draw_graph(){
   layouts = ['random', 'grid', 'circle', 'breadthfirst', 'arbor', 'cose'];
   random_layout = layouts[Math.floor(Math.random()*layouts.length)];
   // setTimeout("cy.layout({ name: '"+random_layout+"' });", 100)
-  setTimeout("cy.layout({ name: 'arbor' });", 100)
+  setTimeout("cy.layout({ name: 'circle' });", 100)
 }
