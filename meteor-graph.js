@@ -272,6 +272,17 @@ if (Meteor.isClient) {
     } 
   });
 
+  // redraw graph for everyone (all sessions)
+  // when new nodes are added
+  //
+  // This is not scoped per graph. Creating a node in one graph will re-draw all graphs.
+  //
+  // Future meteor version uses 'Tracker'
+  // Tracker.autorun(function () {
+  Deps.autorun(function () {
+    draw_graph();
+  });
+
   /* bind node edit events */
   Template.edit_node.events({
     'click #update_node': function(){
