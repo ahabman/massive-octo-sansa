@@ -53,27 +53,46 @@ if (Meteor.isClient) {
   edges_cursor.observeChanges(observe_methods)
 
 
-  $('#create_node_add_kv_pair').live('click', function(){
+
+Template.graphs.onRendered(function () { 
+// "graphs" is a random template. is there a better hook for jquery events (that aren't in a template)?
+
+  $('#create_node_add_kv_pair').on('click', function(){
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.kv_pairs_container') )
     return false;
   })
-  $('#edit_node_add_kv_pair').live('click', function(){
+  $('#edit_node_add_kv_pair').on('click', function(){
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.edit_kv_pairs_container') )
     return false;
   })
-  $('.graph-modes a').live('click', function(){
+  $('.graph-modes a').on('click', function(){
     cy.layout({ name: $(this).html() });
+    console.log($(this).html() )
     Session.set("currentGraphMode", $(this).html() );
     return false;
   })
 
-  $('#toggle-data-tables').live('click', function(){
+  $('#toggle-data-tables').on('click', function(){
     $('#data-tables').toggle();
     current = $.cookie('data_tables_visibility');
     new_state = current=='show' ? 'hide' : 'show' ;
     $.cookie('data_tables_visibility', new_state);
     return false;
   })
+
+
+    $('a#fullscreen').on('click', function(){
+    fullscreen(true);
+    return false;
+  })
+  $('a#exit-fullscreen').on('click', function(){
+    fullscreen(false);
+    return false;
+  })
+
+  
+});
+
 
   function fullscreen(on){
     if(on){
@@ -93,14 +112,7 @@ if (Meteor.isClient) {
     draw_graph();
   }
 
-  $('a#fullscreen').live('click', function(){
-    fullscreen(true);
-    return false;
-  })
-  $('a#exit-fullscreen').live('click', function(){
-    fullscreen(false);
-    return false;
-  })
+
 
 
   /* GRAPHS */
@@ -517,5 +529,9 @@ function draw_graph(){
   layouts = ['random', 'grid', 'circle', 'breadthfirst', 'arbor', 'cose'];
   random_layout = layouts[Math.floor(Math.random()*layouts.length)];
   // setTimeout("cy.layout({ name: '"+random_layout+"' });", 100)
-  setTimeout("cy.layout({ name: 'circle' });", 100)
+
+  layout = Session.get("currentGraphMode");
+
+
+  setTimeout("cy.layout({ name: '"+layout+"' });", 100)
 }
