@@ -57,6 +57,8 @@ if (Meteor.isClient) {
 Template.graphs.onRendered(function () { 
 // "graphs" is a random template. is there a better hook for jquery events (that aren't in a template)?
 
+  $.cookie('graph_layout', $.cookie('graph_layout') || 'arbor');
+
   $('#create_node_add_kv_pair').on('click', function(){
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.kv_pairs_container') )
     return false;
@@ -65,10 +67,10 @@ Template.graphs.onRendered(function () {
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.edit_kv_pairs_container') )
     return false;
   })
-  $('.graph-modes a').on('click', function(){
-    cy.layout({ name: $(this).html() });
-    console.log($(this).html() )
-    Session.set("currentGraphMode", $(this).html() );
+  $('.graph-layouts a').on('click', function(){
+    layout = $(this).html();
+    cy.layout({ name:  layout});
+    $.cookie('graph_layout', layout);
     return false;
   })
 
@@ -90,7 +92,7 @@ Template.graphs.onRendered(function () {
     return false;
   })
 
-  
+
 });
 
 
@@ -525,13 +527,6 @@ function draw_graph(){
     }
   });
 
-
-  layouts = ['random', 'grid', 'circle', 'breadthfirst', 'arbor', 'cose'];
-  random_layout = layouts[Math.floor(Math.random()*layouts.length)];
-  // setTimeout("cy.layout({ name: '"+random_layout+"' });", 100)
-
-  layout = Session.get("currentGraphMode");
-
-
+  layout = $.cookie('graph_layout');
   setTimeout("cy.layout({ name: '"+layout+"' });", 100)
 }
