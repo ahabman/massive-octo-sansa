@@ -57,7 +57,7 @@ if (Meteor.isClient) {
 Template.graphs.onRendered(function () { 
 // "graphs" is a random template. is there a better hook for jquery events (that aren't in a template)?
 
-  $.cookie('graph_layout', $.cookie('graph_layout') || 'arbor');
+  $.cookie('graph_layout', $.cookie('graph_layout') || 'cose');
 
   $('#create_node_add_kv_pair').on('click', function(){
     $('#kv_pair_template').clone().removeAttr('id').show().prependTo( $('.kv_pairs_container') )
@@ -305,7 +305,7 @@ Template.graphs.onRendered(function () {
       node_object = {name: $('#edit_node_name').val()}
 
       // gather fileds to remove (if value is '')
-      unset = {}
+      // unset = {}
 
       key_value_pairs = $('.edit_kv_pairs_container .kv_pair')
       for (var i = 0, len = key_value_pairs.length-1; i <= len; i++) {
@@ -327,7 +327,8 @@ Template.graphs.onRendered(function () {
       node_id = node_object._id;
       delete node_object._id;
 
-      Nodes.update( { '_id' : node_id}, {$set: node_object, $unset: unset} );
+      // Nodes.update( { '_id' : node_id}, {$set: node_object, $unset: unset} );
+      Nodes.update( { '_id' : node_id}, {$set: node_object} );
 
       // reset
       draw_graph();
